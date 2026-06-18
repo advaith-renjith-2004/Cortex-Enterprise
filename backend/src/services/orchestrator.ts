@@ -17,7 +17,7 @@ export interface SearchResult {
  * Connects to NeMo Retriever Embedding NIM.
  * If running in mock mode, returns a deterministic unit-length random vector.
  */
-export async function getEmbedding(text: string): Promise<number[]> {
+export async function getEmbedding(text: string, inputType: 'query' | 'passage' = 'query'): Promise<number[]> {
   const dimension = NVIDIA_CONFIG.embeddingDimension;
 
   if (isNvidiaMock) {
@@ -39,7 +39,8 @@ export async function getEmbedding(text: string): Promise<number[]> {
     const response = await nvidiaClient.embeddings.create({
       model: NVIDIA_CONFIG.embeddingModel,
       input: [text],
-    });
+      input_type: inputType,
+    } as any);
     return response.data[0].embedding;
   } catch (err: any) {
     console.error('[Cortex SDK] Error calling NVIDIA Embedding NIM:', err?.message || err);

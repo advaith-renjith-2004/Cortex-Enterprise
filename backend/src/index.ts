@@ -93,6 +93,10 @@ app.post('/api/seed', async (req: Request, res: Response) => {
 
     if (empError) throw new Error(`HR seeding failed: ${empError.message}`);
 
+    // Delete existing records to prevent duplication on re-seed
+    await supabase.from('ledgers').delete().gt('ledger_id', 0);
+    await supabase.from('technical_logs').delete().gt('log_id', 0);
+
     // 2. Seed Ledgers (Strict Numeric scale)
     const { error: ledgerError } = await supabase.from('ledgers').insert([
       { transaction_date: '2026-06-17', account_name: 'Office Supplies Depot', description: 'Ergonomic chairs for developers', amount: 750.00, type: 'DEBIT', category: 'Office Supplies' },
@@ -127,7 +131,7 @@ app.post('/api/seed', async (req: Request, res: Response) => {
     console.log('[Cortex Seeding] Generating vector embeddings for technical logs...');
     const vectorLogs = await Promise.all(
       rawLogs.map(async (log) => {
-        const embedding = await getEmbedding(log.content);
+        const embedding = await getEmbedding(log.content, 'passage');
         return {
           ...log,
           embedding,
