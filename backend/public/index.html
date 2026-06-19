@@ -1865,45 +1865,7 @@
         background: var(--primary-hover);
         transform: translateY(-1px);
       }
-      .quick-logins-section {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        border-top: 1px dashed var(--border-color);
-        padding-top: 1rem;
-      }
-      .quick-title {
-        font-size: 0.72rem;
-        font-weight: 700;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        text-align: center;
-      }
-      .quick-pills-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.5rem;
-      }
-      .quick-pill-btn {
-        background: #ffffff;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        color: var(--text-main);
-        padding: 0.4rem 0.5rem;
-        font-size: 0.74rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-        text-align: left;
-        transition: all 0.2s ease;
-      }
-      .quick-pill-btn:hover {
-        background: #f9fafb;
-        border-color: var(--text-light);
-        transform: translateY(-1px);
-      }
+
       .pill-badge {
         font-size: 0.6rem;
         font-weight: 800;
@@ -2024,24 +1986,7 @@
           </button>
         </form>
 
-        <!-- Quick Logins -->
-        <div class="quick-logins-section">
-          <span class="quick-title">Quick Demo Profiles</span>
-          <div class="quick-pills-container">
-            <button class="quick-pill-btn" onclick="fillQuickLogin('advaith.renjith@cortex-enterprise.io')">
-              <span class="pill-badge admin-badge">CEO</span> Advaith (CEO)
-            </button>
-            <button class="quick-pill-btn" onclick="fillQuickLogin('priya.nair@cortex-enterprise.io')">
-              <span class="pill-badge finance-badge">FIN</span> Priya (Audit)
-            </button>
-            <button class="quick-pill-btn" onclick="fillQuickLogin('ananya.krishnan@cortex-enterprise.io')">
-              <span class="pill-badge qa-badge">QA</span> Ananya (Testing)
-            </button>
-            <button class="quick-pill-btn" onclick="fillQuickLogin('rohan.mehta@cortex-enterprise.io')">
-              <span class="pill-badge prod-badge">PROD</span> Rohan (Mechanical)
-            </button>
-          </div>
-        </div>
+
       </div>
     </div>
   </div>
@@ -3629,11 +3574,7 @@
       }
     }
 
-    function fillQuickLogin(email) {
-      document.getElementById('login-email').value = email;
-      document.getElementById('login-password').value = 'password';
-      document.getElementById('btn-login-submit').click();
-    }
+
 
     async function handleLogin(e) {
       e.preventDefault();
