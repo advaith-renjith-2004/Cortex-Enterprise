@@ -4,7 +4,7 @@ Cortex Enterprise is a modern, voice-and-text-activated local search engine inte
 
 ---
 
-## 🏗️ Architecture Blueprint
+## Architecture Blueprint
 
 ```
                       +-----------------------------+
@@ -45,7 +45,7 @@ Cortex Enterprise is a modern, voice-and-text-activated local search engine inte
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 - **AI Inference (NVIDIA NIM)**:
   - **Voice Processing**: NVIDIA Riva ASR for speech-to-text.
@@ -60,7 +60,7 @@ Cortex Enterprise is a modern, voice-and-text-activated local search engine inte
 
 ---
 
-## 📁 Directory Structure
+## Directory Structure
 
 ```
 .
@@ -82,7 +82,7 @@ Cortex Enterprise is a modern, voice-and-text-activated local search engine inte
 
 ---
 
-## 🚀 Installation & Setup
+## Installation & Setup
 
 ### 1. Database Setup (Supabase)
 Create a new migration in your Supabase dashboard SQL editor or run the migration script directly:
@@ -106,7 +106,7 @@ The server will boot on `http://localhost:8000`.
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### 1. Health Status
 - **Method**: `GET /health`
