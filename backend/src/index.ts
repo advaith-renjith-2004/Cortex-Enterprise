@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import { processCortexQuery, getEmbedding } from './services/orchestrator';
 import { supabase, isSupabaseMock } from './config/supabase';
 
@@ -11,6 +12,7 @@ const port = process.env.PORT || 8000;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '../public')));
 
 // ============================================================================
 // Core Search Endpoint
