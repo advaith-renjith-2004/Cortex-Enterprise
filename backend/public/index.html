@@ -3,33 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cortex Enterprise - ERP AI Search Core</title>
+  <title>Cortex Enterprise ERP Portal</title>
   
   <!-- Premium Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
+  <!-- Chart.js for data virtualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <!-- CSS Stylesheet -->
   <style>
     :root {
-      --bg-dark: #0a0a12;
-      --bg-card: rgba(20, 20, 35, 0.6);
-      --border-card: rgba(255, 255, 255, 0.08);
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
+      --bg-workspace: #f8f9fa;
+      --bg-card: #ffffff;
+      --border-color: #e5e7eb;
       
-      /* Vibrant color accents */
-      --primary: #8b5cf6;       /* Violet */
-      --primary-glow: rgba(139, 92, 246, 0.35);
-      --secondary: #06b6d4;     /* Cyan */
-      --secondary-glow: rgba(6, 182, 212, 0.3);
-      --accent: #ec4899;        /* Pink */
+      --text-main: #1f2937;      /* Charcoal */
+      --text-muted: #6b7280;     /* Grey */
+      --text-light: #9ca3af;
+      
+      /* Corporate Blue Palette */
+      --primary: #0284c7;        /* Corporate sky-blue */
+      --primary-hover: #0369a1;
+      --primary-light: #e0f2fe;  /* Active link bg */
+      --secondary: #0d9488;      /* Teal */
+      --accent: #f43f5e;         /* Rose pink */
+      
       --success: #10b981;
       --warning: #f59e0b;
       --error: #ef4444;
       
-      --font-outfit: 'Outfit', sans-serif;
+      --font-playfair: 'Playfair Display', serif;
       --font-inter: 'Inter', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
     }
@@ -41,70 +47,260 @@
     }
 
     body {
-      background-color: var(--bg-dark);
-      background-image: 
-        radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.1) 0%, transparent 45%);
-      background-attachment: fixed;
+      background-color: var(--bg-workspace);
       font-family: var(--font-inter);
       color: var(--text-main);
       min-height: 100vh;
-      overflow-x: hidden;
-      line-height: 1.6;
-    }
-
-    /* Container */
-    .app-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2.5rem 1.5rem;
-    }
-
-    /* Header Styles */
-    header {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 3.5rem;
-      position: relative;
+      overflow-x: hidden;
     }
 
-    .brand {
+    /* ============================================================================
+    // COLLAPSIBLE SIDEBAR PANEL (Workiva Style)
+    // ============================================================================ */
+    .sidebar {
+      width: 250px;
+      background-color: #ffffff;
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .sidebar.collapsed {
+      width: 68px;
+    }
+
+    /* Sidebar Logo Slot */
+    .sidebar-header {
+      padding: 1.5rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .sidebar-logo {
+      font-family: var(--font-playfair);
+      font-weight: 900;
+      font-size: 1.35rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-symbol {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 800;
+      font-family: var(--font-playfair);
+      font-size: 0.95rem;
+    }
+
+    .btn-collapse {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 4px;
+    }
+
+    .btn-collapse:hover {
+      background: #f3f4f6;
+    }
+
+    /* Navigation items list */
+    .sidebar-menu {
+      flex: 1;
+      padding: 1.25rem 0.75rem;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .menu-section-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-light);
+      padding: 0.75rem 0.5rem 0.35rem 0.5rem;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .sidebar.collapsed .menu-section-label {
+      opacity: 0;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 0.75rem;
+      border-radius: 8px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .menu-item:hover {
+      background-color: #f3f4f6;
+      color: var(--text-main);
+    }
+
+    .menu-item.active {
+      background-color: var(--primary-light);
+      color: #0369a1;
+      font-weight: 600;
+    }
+
+    .menu-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-text {
+      transition: opacity 0.2s ease;
+    }
+
+    .sidebar.collapsed .menu-text {
+      opacity: 0;
+      width: 0;
+      pointer-events: none;
+    }
+
+    /* Profile Slot at the bottom */
+    .sidebar-profile {
+      border-top: 1px solid var(--border-color);
+      padding: 1rem 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .profile-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e0f2fe;
+      color: #0369a1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    .profile-info {
       display: flex;
       flex-direction: column;
     }
 
-    .brand-title {
-      font-family: var(--font-outfit);
-      font-size: 2.2rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #ffffff 40%, #c084fc 80%, #22d3ee 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .profile-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .profile-role {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .sidebar.collapsed .profile-info {
+      opacity: 0;
+      width: 0;
+      pointer-events: none;
+    }
+
+    /* ============================================================================
+    // MAIN WRAPPER & HEADER
+    // ============================================================================ */
+    .main-wrapper {
+      flex: 1;
+      margin-left: 250px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body.collapsed-sidebar .main-wrapper {
+      margin-left: 68px;
+    }
+
+    /* Top Navigation bar */
+    .top-header {
+      background-color: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+      height: 60px;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .header-title-container {
       display: flex;
       align-items: center;
       gap: 0.75rem;
     }
 
-    .brand-title .badge {
-      font-family: var(--font-inter);
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      padding: 0.25rem 0.6rem;
-      border-radius: 12px;
-      background: rgba(139, 92, 246, 0.15);
-      border: 1px solid rgba(139, 92, 246, 0.3);
-      color: #c084fc;
-      vertical-align: middle;
-      text-transform: uppercase;
+    .header-title {
+      font-family: var(--font-playfair);
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--text-main);
     }
 
-    .brand-subtitle {
+    .header-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      background: #f3f4f6;
+      border: 1px solid var(--border-color);
       color: var(--text-muted);
-      font-size: 0.95rem;
-      margin-top: 0.25rem;
+    }
+
+    .header-badge.active-badge {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+      color: #059669;
     }
 
     .header-actions {
@@ -113,58 +309,30 @@
       gap: 1rem;
     }
 
-    .status-indicator {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-card);
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 500;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: var(--success);
-      box-shadow: 0 0 10px var(--success);
-      position: relative;
-    }
-
-    .status-dot.loading {
-      background-color: var(--warning);
-      box-shadow: 0 0 10px var(--warning);
-      animation: pulse 1.5s infinite;
-    }
-
-    /* Buttons */
+    /* Seeding button styled corporate style */
     .btn {
       font-family: var(--font-inter);
       font-weight: 600;
-      font-size: 0.85rem;
-      padding: 0.65rem 1.25rem;
-      border-radius: 10px;
+      font-size: 0.82rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
       border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      gap: 0.4rem;
+      transition: all 0.2s ease;
     }
 
     .btn-outline {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-card);
+      background: #ffffff;
+      border: 1px solid var(--border-color);
       color: var(--text-main);
     }
 
     .btn-outline:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.2);
-      transform: translateY(-1px);
+      background: #f9fafb;
+      border-color: #d1d5db;
     }
 
     .btn-outline.spinning svg {
@@ -172,390 +340,445 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+      background: var(--primary);
       color: #ffffff;
-      box-shadow: 0 4px 15px var(--primary-glow);
     }
 
     .btn-primary:hover {
-      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
-      transform: translateY(-1px);
+      background: var(--primary-hover);
     }
 
-    /* Core Search Box Area */
-    .search-section {
-      max-width: 850px;
-      margin: 0 auto 4rem auto;
-      text-align: center;
+    /* Workspace Content Area */
+    .workspace-content {
+      padding: 2rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
     }
 
-    .search-wrapper {
-      position: relative;
-      background: var(--bg-card);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 20px;
-      border: 1px solid var(--border-card);
-      padding: 0.4rem;
+    /* Dynamic View tabs wrappers */
+    .tab-view {
+      display: none;
+    }
+
+    .tab-view.active-view {
+      display: block;
+    }
+
+    /* ============================================================================
+    // FLAT WHITE CARDS & GRID LAYOUT
+    // ============================================================================ */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid #f3f4f6;
+      padding-bottom: 0.75rem;
+    }
+
+    .card-title {
+      font-family: var(--font-playfair);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-main);
+    }
+
+    /* ============================================================================
+    // PLAYFAIR DISPLAY DISPLAY METRIC BLOCKS
+    // ============================================================================ */
+    .metric-value {
+      font-family: var(--font-playfair);
+      font-weight: 800;
+      font-size: 2.2rem;
+      color: var(--text-main);
+      line-height: 1.1;
+      margin-bottom: 0.25rem;
+    }
+
+    .metric-value.weight-black { font-weight: 900; }
+    .metric-value.weight-semibold { font-weight: 600; }
+    .metric-value.weight-medium { font-weight: 500; }
+
+    .metric-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+    }
+
+    /* ============================================================================
+    // DATA TABLES STYLE
+    // ============================================================================ */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .data-table th {
+      background-color: #f9fafb;
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .data-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr:hover td {
+      background-color: #f9fafb;
+    }
+
+    /* Table Badges */
+    .badge-status {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-status.pass { background: #d1fae5; color: #065f46; }
+    .badge-status.fail { background: #fee2e2; color: #991b1b; }
+    .badge-status.inconclusive { background: #fef3c7; color: #92400e; }
+    
+    .badge-dept {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-dept.hr { background: #d1fae5; color: #065f46; }
+    .badge-dept.accounting { background: #e0f2fe; color: #0369a1; }
+    .badge-dept.production { background: #e0e7ff; color: #3730a3; }
+    .badge-dept.qa { background: #fef3c7; color: #92400e; }
+    .badge-dept.marketing { background: #fce7f3; color: #9d174d; }
+
+    .badge-type {
+      display: inline-block;
+      padding: 0.2rem 0.45rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+    .badge-type.debit { background: #fee2e2; color: #991b1b; }
+    .badge-type.credit { background: #d1fae5; color: #065f46; }
+
+    /* ============================================================================
+    // SEARCH CONSOLE LAYOUT (Tab 1)
+    // ============================================================================ */
+    .search-input-wrapper {
       display: flex;
       align-items: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      transition: all 0.3s ease;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.35rem 0.5rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      max-width: 750px;
+      margin: 0 auto 1.5rem auto;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .search-wrapper:focus-within {
+    .search-input-wrapper:focus-within {
       border-color: var(--primary);
-      box-shadow: 0 0 25px var(--primary-glow);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
     }
 
     .search-input {
       flex: 1;
-      background: transparent;
       border: none;
       outline: none;
-      padding: 0.8rem 1.2rem;
+      padding: 0.5rem 0.8rem;
+      font-size: 1rem;
       color: var(--text-main);
-      font-size: 1.1rem;
-      font-family: var(--font-inter);
     }
 
-    .search-input::placeholder {
-      color: var(--text-muted);
-    }
-
-    .search-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding-right: 0.5rem;
-    }
-
-    .icon-btn {
-      width: 45px;
-      height: 45px;
-      border-radius: 12px;
+    .search-btn-mic {
+      width: 38px;
+      height: 38px;
+      border-radius: 6px;
       border: none;
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text-main);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
+      transition: background 0.2s ease;
     }
 
-    .icon-btn:hover {
-      background: rgba(255, 255, 255, 0.09);
-      color: #ffffff;
+    .search-btn-mic:hover {
+      background: #f3f4f6;
     }
 
-    .icon-btn.active-mic {
-      background: linear-gradient(135deg, var(--accent) 0%, #db2777 100%);
+    .search-btn-mic.recording {
+      background: var(--accent);
       color: #ffffff;
-      box-shadow: 0 0 15px rgba(236, 72, 153, 0.5);
       animation: pulse 1.5s infinite;
     }
 
-    .btn-search {
-      height: 45px;
-      padding: 0 1.5rem;
-      border-radius: 12px;
-      border: none;
-      background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+    .btn-search-go {
+      background-color: var(--primary);
       color: #ffffff;
-      font-family: var(--font-inter);
+      height: 38px;
+      padding: 0 1.25rem;
+      border-radius: 6px;
+      border: none;
       font-weight: 600;
+      font-size: 0.85rem;
       cursor: pointer;
-      box-shadow: 0 4px 12px var(--primary-glow);
-      transition: all 0.2s ease;
+      transition: background 0.2s ease;
     }
 
-    .btn-search:hover {
-      box-shadow: 0 6px 15px rgba(139, 92, 246, 0.45);
-      transform: translateY(-1px);
+    .btn-search-go:hover {
+      background-color: var(--primary-hover);
     }
 
-    /* Suggestion Pills */
-    .suggestions {
+    .suggestions-container {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-top: 1.25rem;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
     }
 
     .suggestion-pill {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-card);
+      background: #ffffff;
+      border: 1px solid var(--border-color);
       color: var(--text-muted);
-      padding: 0.45rem 1rem;
-      border-radius: 30px;
-      font-size: 0.85rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 15px;
+      font-size: 0.8rem;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .suggestion-pill:hover {
-      background: rgba(139, 92, 246, 0.1);
-      border-color: rgba(139, 92, 246, 0.3);
-      color: #c084fc;
-      transform: translateY(-1px);
+      background: var(--primary-light);
+      border-color: #93c5fd;
+      color: #0369a1;
     }
 
-    /* Dashboard Layout Panels */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: 380px 1fr;
-      gap: 2rem;
-      margin-bottom: 3rem;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .dashboard-grid.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* Glassmorphism Cards */
-    .card {
-      background: var(--bg-card);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 16px;
-      border: 1px solid var(--border-card);
-      padding: 1.75rem;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .card-title {
-      font-family: var(--font-outfit);
-      font-size: 1.25rem;
-      font-weight: 700;
+    /* Result Columns */
+    .report-title {
+      font-family: var(--font-playfair);
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: var(--text-main);
       margin-bottom: 1.25rem;
-      color: #ffffff;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      padding-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--primary-light);
     }
 
-    /* Left Sidebar Parameters/Metadata Panel */
-    .meta-item {
-      margin-bottom: 1.25rem;
-    }
-
-    .meta-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-      margin-bottom: 0.4rem;
-    }
-
-    .meta-value {
-      font-weight: 500;
+    .report-output {
       font-size: 0.95rem;
+      line-height: 1.6;
     }
 
-    .badge-dept {
-      display: inline-block;
-      padding: 0.35rem 0.75rem;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: 0.2px;
-    }
-
-    .badge-dept.hr {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #34d399;
-    }
-
-    .badge-dept.ca {
-      background: rgba(6, 182, 212, 0.15);
-      border: 1px solid rgba(6, 182, 212, 0.3);
-      color: #22d3ee;
-    }
-
-    .badge-dept.qa {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      color: #fbbf24;
-    }
-
-    .badge-dept.none {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: var(--text-muted);
-    }
-
-    .code-block {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      padding: 0.85rem;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      color: #22d3ee;
-      overflow-x: auto;
-      max-height: 250px;
-    }
-
-    /* Right Main Report Panel */
-    .report-card {
-      min-height: 500px;
-    }
-
-    .report-content {
-      font-size: 1rem;
-      line-height: 1.7;
-    }
-
-    /* Styled Synthesized Markdown Output */
-    .report-content h3 {
-      font-family: var(--font-outfit);
-      font-size: 1.4rem;
+    .report-output h3 {
+      font-family: var(--font-playfair);
       font-weight: 700;
-      color: #ffffff;
-      margin-top: 0.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .report-content h4 {
-      font-family: var(--font-outfit);
       font-size: 1.15rem;
-      font-weight: 600;
-      color: #c084fc;
-      margin-top: 1.25rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .report-content p {
-      margin-bottom: 1.25rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
       color: var(--text-main);
     }
 
-    .report-content ul, .report-content ol {
-      margin-left: 1.5rem;
-      margin-bottom: 1.25rem;
+    .report-output h4 {
+      font-family: var(--font-playfair);
+      font-weight: 600;
+      font-size: 1rem;
+      margin-top: 1.25rem;
+      margin-bottom: 0.4rem;
+      color: #0369a1;
     }
 
-    .report-content li {
-      margin-bottom: 0.5rem;
+    .report-output p {
+      margin-bottom: 1rem;
     }
 
-    .report-content strong {
-      color: #ffffff;
+    .report-output ul {
+      margin-left: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .report-output li {
+      margin-bottom: 0.35rem;
+    }
+
+    .report-output strong {
       font-weight: 600;
     }
 
-    /* Tables in Synthesis */
-    .report-content table {
+    .report-output table {
       width: 100%;
       border-collapse: collapse;
-      margin: 1.5rem 0;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 8px;
+      margin: 1rem 0;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
       overflow: hidden;
     }
 
-    .report-content th, .report-content td {
-      padding: 0.75rem 1rem;
-      text-align: left;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    .report-output th, .report-output td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.85rem;
     }
 
-    .report-content th {
-      background-color: rgba(255, 255, 255, 0.03);
+    .report-output th {
+      background: #f9fafb;
       font-weight: 600;
-      color: #ffffff;
     }
 
-    /* Raw Database Accordion */
-    .raw-accordion {
-      margin-bottom: 2rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border-card);
-      border-radius: 12px;
+    /* Accordion styles */
+    .inspect-accordion {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-top: 1.5rem;
       overflow: hidden;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.5s ease 0.1s;
+      background-color: #ffffff;
     }
 
-    .raw-accordion.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .accordion-header {
-      padding: 1.2rem 1.75rem;
+    .inspect-header {
+      padding: 0.75rem 1.25rem;
+      background: #f9fafb;
       display: flex;
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
       user-select: none;
-      transition: background 0.2s ease;
-    }
-
-    .accordion-header:hover {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .accordion-title {
+      font-size: 0.85rem;
       font-weight: 600;
-      font-size: 0.95rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
       color: var(--text-muted);
     }
 
-    .accordion-icon {
-      transition: transform 0.3s ease;
+    .inspect-icon {
+      transition: transform 0.2s ease;
     }
 
-    .raw-accordion.expanded .accordion-icon {
+    .inspect-accordion.expanded .inspect-icon {
       transform: rotate(180deg);
     }
 
-    .accordion-content {
+    .inspect-content {
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      background: rgba(0, 0, 0, 0.3);
+      transition: max-height 0.3s ease;
+      background: #fafafb;
     }
 
-    .raw-accordion.expanded .accordion-content {
-      max-height: 600px;
+    .inspect-accordion.expanded .inspect-content {
+      max-height: 400px;
       overflow-y: auto;
     }
 
-    .json-wrapper {
-      padding: 1.5rem;
+    .json-block {
+      padding: 1.25rem;
       font-family: var(--font-mono);
-      font-size: 0.8rem;
-      color: #34d399;
+      font-size: 0.78rem;
+      color: #0891b2;
       white-space: pre-wrap;
     }
 
-    /* Recording Overlay Waveform Animation */
+    /* ============================================================================
+    // DATA ENTRY / INGESTION FORM STYLING
+    // ============================================================================ */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.4rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-family: var(--font-inter);
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+    }
+
+    .form-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 1rem;
+      padding-right: 2rem;
+    }
+
+    /* ============================================================================
+    // VOICE OVERLAY RECORDING SCREEN
+    // ============================================================================ */
     .voice-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(10, 10, 18, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(255, 255, 255, 0.95);
       z-index: 100;
       display: flex;
       flex-direction: column;
@@ -571,19 +794,19 @@
       pointer-events: all;
     }
 
-    .wave-container {
+    .wave-wrapper {
       display: flex;
       align-items: center;
-      gap: 8px;
-      height: 100px;
-      margin-bottom: 2rem;
+      gap: 6px;
+      height: 80px;
+      margin-bottom: 1.5rem;
     }
 
     .wave-bar {
-      width: 6px;
-      height: 20px;
-      background: linear-gradient(to top, var(--accent) 0%, var(--primary) 100%);
-      border-radius: 3px;
+      width: 5px;
+      height: 15px;
+      background: var(--primary);
+      border-radius: 2px;
       animation: soundwave 1.2s ease-in-out infinite;
     }
 
@@ -595,43 +818,41 @@
     .wave-bar:nth-child(6) { animation-delay: 0.4s; }
     .wave-bar:nth-child(7) { animation-delay: 0.3s; }
     .wave-bar:nth-child(8) { animation-delay: 0.2s; }
-    .wave-bar:nth-child(9) { animation-delay: 0.1s; }
 
-    .voice-instruction {
-      font-family: var(--font-outfit);
+    .voice-status {
+      font-family: var(--font-playfair);
+      font-weight: 700;
       font-size: 1.5rem;
-      font-weight: 600;
-      color: #ffffff;
+      color: var(--text-main);
       margin-bottom: 0.5rem;
     }
 
-    .voice-transcription {
+    .voice-prompt {
       color: var(--text-muted);
-      font-size: 1.05rem;
-      max-width: 500px;
-      text-align: center;
+      font-size: 0.95rem;
     }
 
-    /* Toast Notification */
+    /* ============================================================================
+    // TOAST & GENERIC UTILS
+    // ============================================================================ */
     .toast {
       position: fixed;
       bottom: 2rem;
       right: 2rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border-card);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: #ffffff;
+      border: 1px solid var(--border-color);
       border-left: 4px solid var(--primary);
-      padding: 1rem 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      padding: 0.85rem 1.5rem;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
       z-index: 1000;
       transform: translateY(100px);
       opacity: 0;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 0.88rem;
     }
 
     .toast.visible {
@@ -642,206 +863,400 @@
     .toast-success { border-left-color: var(--success); }
     .toast-error { border-left-color: var(--error); }
 
-    /* Welcome / Empty State Screen */
-    .empty-state {
-      max-width: 600px;
-      margin: 3rem auto;
-      text-align: center;
-      background: var(--bg-card);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border-card);
-      border-radius: 20px;
-      padding: 3rem 2rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    }
-
-    .empty-icon {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      background: rgba(139, 92, 246, 0.1);
-      border: 1px solid rgba(139, 92, 246, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.5rem auto;
-      color: var(--primary);
-    }
-
-    .empty-title {
-      font-family: var(--font-outfit);
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-      color: #ffffff;
-    }
-
-    .empty-desc {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      margin-bottom: 1.5rem;
-    }
-
-    /* Keyframe Animations */
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.03); opacity: 0.9; box-shadow: 0 0 20px var(--primary-glow); }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    @keyframes spin {
-      100% { transform: rotate(360deg); }
-    }
-
-    @keyframes soundwave {
-      0% { height: 20px; }
-      50% { height: 75px; }
-      100% { height: 20px; }
-    }
-
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-
     /* Skeleton Loading effect */
     .skeleton {
-      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+      background: linear-gradient(90deg, rgba(0,0,0,0.03) 25%, rgba(0,0,0,0.06) 50%, rgba(0,0,0,0.03) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
       border-radius: 4px;
     }
+    .skeleton-text { height: 14px; margin-bottom: 0.75rem; }
+    .skeleton-title { height: 26px; width: 60%; margin-bottom: 1.25rem; }
 
-    .skeleton-text {
-      height: 16px;
-      margin-bottom: 0.75rem;
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes pulse { 50% { transform: scale(1.05); } }
+    @keyframes soundwave { 0%, 100% { height: 15px; } 50% { height: 60px; } }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+    /* Filter Toolbar Row */
+    .filter-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      gap: 1rem;
     }
 
-    .skeleton-title {
-      height: 28px;
-      width: 60%;
-      margin-bottom: 1.5rem;
+    .search-filter-input {
+      max-width: 300px;
+      padding: 0.45rem 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
     }
 
-    /* Responsive */
-    @media (max-width: 1024px) {
-      .dashboard-grid {
-        grid-template-columns: 1fr;
-      }
+    .search-filter-input:focus { border-color: var(--primary); }
+
+    .dropdown-filter {
+      padding: 0.45rem 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      background: #ffffff;
+      outline: none;
     }
   </style>
 </head>
 <body>
-  
-  <div class="app-container">
-    
-    <!-- Header -->
-    <header>
-      <div class="brand">
-        <h1 class="brand-title">Cortex Enterprise <span class="badge" id="env-badge">Dev</span></h1>
-        <p class="brand-subtitle">Voice & Text AI Search Engine for Mini-ERP</p>
+
+  <!-- Collapsible Side Navigation Panel -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-symbol">C</div>
+        <span class="menu-text" style="font-family: var(--font-playfair); font-weight: 900;">Cortex ERP</span>
       </div>
+      <button class="btn-collapse" id="btn-collapse" title="Collapse Menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+    
+    <ul class="sidebar-menu">
+      <li class="menu-section-label">Operations</li>
+      <li>
+        <a class="menu-item active" data-tab="tab-search">
+          <span class="menu-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+          <span class="menu-text">Search Core</span>
+        </a>
+      </li>
+
+      <li class="menu-section-label">Data Management</li>
+      <li>
+        <a class="menu-item" data-tab="tab-hr">
+          <span class="menu-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+          <span class="menu-text">HR Directory</span>
+        </a>
+      </li>
+      <li>
+        <a class="menu-item" data-tab="tab-finance">
+          <span class="menu-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </span>
+          <span class="menu-text">Accounts Ledger</span>
+        </a>
+      </li>
+      <li>
+        <a class="menu-item" data-tab="tab-qa">
+          <span class="menu-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </span>
+          <span class="menu-text">QA testing center</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Bottom profile card matching screenshot (Paul Sanna) -->
+    <div class="sidebar-profile">
+      <div class="profile-avatar">PS</div>
+      <div class="profile-info">
+        <span class="profile-name">Paul Sanna</span>
+        <span class="profile-role">Admin User</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main View Area -->
+  <div class="main-wrapper">
+    <!-- Top sticky navigation bar -->
+    <header class="top-header">
+      <div class="header-title-container">
+        <h2 class="header-title" id="page-title">Search Core</h2>
+        <span class="header-badge active-badge" id="env-badge">Active</span>
+      </div>
+      
       <div class="header-actions">
-        <div class="status-indicator">
-          <div class="status-dot" id="status-dot"></div>
-          <span id="status-text">Health Checking...</span>
+        <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
+          <span style="width: 7px; height: 7px; border-radius: 50%; background-color: var(--success); display: inline-block;"></span>
+          <span id="status-text">Connected</span>
         </div>
-        <button class="btn btn-outline" id="btn-seed">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-          Re-Seed DB
+        <button class="btn btn-outline" id="btn-seed" title="Seed Database">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          Re-Seed ERP
         </button>
       </div>
     </header>
 
-    <!-- Search Section -->
-    <main>
-      <section class="search-section">
-        <div class="search-wrapper">
-          <input type="text" class="search-input" id="search-input" placeholder="Ask anything about employees, ledgers, or hardware testing sheets...">
-          <div class="search-actions">
-            <button class="icon-btn" id="btn-mic" title="Voice Search">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-            </button>
-            <button class="btn-search" id="btn-search">Search Core</button>
-          </div>
-        </div>
-        
-        <!-- Suggestions -->
-        <div class="suggestions">
-          <span class="suggestion-pill" data-query="Find circuit continuity testing logs showing failures">Find circuit continuity failures</span>
-          <span class="suggestion-pill" data-query="Show me accounts ledger items under category Office Supplies">Show Office Supplies expenses</span>
-          <span class="suggestion-pill" data-query="Who is the lead test engineer in the QA department?">Find QA Lead Engineer</span>
-        </div>
-      </section>
+    <!-- Workspace views contents -->
+    <main class="workspace-content">
 
-      <!-- Welcome State -->
-      <section class="empty-state" id="empty-state">
-        <div class="empty-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <!-- ============================================================================
+      // VIEW 1: SEARCH HUB
+      // ============================================================================ -->
+      <section class="tab-view active-view" id="tab-search">
+        <div class="search-input-wrapper">
+          <input type="text" class="search-input" id="search-input" placeholder="Query records (e.g. Find employee Bob, search ledger office supplies...)">
+          <button class="search-btn-mic" id="btn-mic" title="Record Voice">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+          </button>
+          <button class="btn-search-go" id="btn-search">Search</button>
         </div>
-        <h2 class="empty-title">Ready for Search Operations</h2>
-        <p class="empty-desc">Enter a text query above or click the microphone to speak a voice search command. Llama 3.3 70B will orchestrate the semantic search safely using Supabase pgvector.</p>
-      </section>
 
-      <!-- Results Grid -->
-      <section class="dashboard-grid" id="results-grid">
-        <!-- Sidebar Metadata -->
-        <div class="card">
-          <h3 class="card-title">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
-            Routing Core
-          </h3>
-          
-          <div class="meta-item">
-            <div class="meta-label">Target Department</div>
-            <div class="meta-value">
-              <span class="badge-dept" id="meta-dept">-</span>
+        <div class="suggestions-container">
+          <span class="suggestion-pill" data-query="Find circuit continuity testing logs showing failures">Search QA Circuit Failures</span>
+          <span class="suggestion-pill" data-query="Show me accounts ledger items under category Office Supplies">Check Office Supplies ledger</span>
+          <span class="suggestion-pill" data-query="Who works in the QA department and what are their emails?">Find QA Employees</span>
+        </div>
+
+        <div class="card-grid" style="display: none;" id="search-results-grid">
+          <!-- Left Parameters -->
+          <div class="card" style="grid-column: span 4;">
+            <div class="card-header">
+              <h3 class="card-title">Routing Details</h3>
+            </div>
+            
+            <div class="form-group">
+              <span class="form-label">Target Department</span>
+              <div style="font-weight: 600; margin-top: 0.25rem;" id="meta-dept">-</div>
+            </div>
+            <div class="form-group">
+              <span class="form-label">Tool Used</span>
+              <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--primary);" id="meta-tool">-</div>
+            </div>
+            <div class="form-group">
+              <span class="form-label">Extracted Parameters</span>
+              <pre class="code-block" id="meta-args">{}</pre>
             </div>
           </div>
-          
-          <div class="meta-item">
-            <div class="meta-label">Tool Invoked</div>
-            <div class="meta-value" id="meta-tool" style="font-family: var(--font-mono); font-size: 0.85rem; color: #a78bfa;">-</div>
-          </div>
-          
-          <div class="meta-item">
-            <div class="meta-label">Extracted Parameters</div>
-            <pre class="code-block" id="meta-args">{}</pre>
-          </div>
-        </div>
 
-        <!-- Main Summary Report -->
-        <div class="card report-card">
-          <h3 class="card-title">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            AI Audit Summary
-          </h3>
-          <div class="report-content" id="report-text">
-            <!-- Rendered markdown results -->
+          <!-- Right synthesized markdown report -->
+          <div class="card" style="grid-column: span 8; min-height: 400px;">
+            <div class="card-header">
+              <h3 class="card-title">AI Summary</h3>
+            </div>
+            <div class="report-output" id="report-text">
+              <!-- Rendered markdown outputs -->
+            </div>
+
+            <!-- Database Inspector Accordion -->
+            <div class="inspect-accordion" id="inspect-accordion">
+              <div class="inspect-header" id="inspect-toggle">
+                <span>Inspect Query Database Output</span>
+                <svg class="inspect-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <div class="inspect-content">
+                <pre class="json-block" id="inspect-json">[]</pre>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- Raw Accordion -->
-      <section class="raw-accordion" id="raw-accordion">
-        <div class="accordion-header" id="accordion-toggle">
-          <div class="accordion-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-            Inspect Raw Database Array
+      <!-- ============================================================================
+      // VIEW 2: HR DIRECTORY
+      // ============================================================================ -->
+      <section class="tab-view" id="tab-hr">
+        <div class="card-grid">
+          <div class="card" style="grid-column: span 4;">
+            <div class="card-header">
+              <h3 class="card-title">Staff Headcount</h3>
+            </div>
+            <div class="metric-value weight-black" id="hr-count-val">3</div>
+            <span class="metric-label">Active Employees</span>
           </div>
-          <svg class="accordion-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+
+          <!-- HR Data Visual chart -->
+          <div class="card" style="grid-column: span 8;">
+            <div class="card-header">
+              <h3 class="card-title">Department Distribution</h3>
+            </div>
+            <div style="height: 160px; position: relative;">
+              <canvas id="hrChart"></canvas>
+            </div>
+          </div>
         </div>
-        <div class="accordion-content">
-          <pre class="json-wrapper" id="raw-json">[]</pre>
+
+        <!-- Data table employee records -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Employee Directory</h3>
+          </div>
+          
+          <div class="filter-row">
+            <input type="text" class="search-filter-input" id="hr-search-filter" placeholder="Search by name...">
+            <select class="dropdown-filter" id="hr-dept-filter">
+              <option value="ALL">All Departments</option>
+              <option value="HR">HR</option>
+              <option value="Accounting">Accounting</option>
+              <option value="Production">Production</option>
+              <option value="QA">QA</option>
+              <option value="Administration">Administration</option>
+            </select>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table" id="hr-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Department</th>
+                  <th>Role</th>
+                  <th>Hire Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
+
+      <!-- ============================================================================
+      // VIEW 3: FINANCIAL LEDGER
+      // ============================================================================ -->
+      <section class="tab-view" id="tab-finance">
+        <div class="card-grid">
+          <div class="card" style="grid-column: span 4;">
+            <div class="card-header">
+              <h3 class="card-title">Balance Statistics</h3>
+            </div>
+            <div class="metric-value weight-semibold" style="color: var(--accent);" id="ledger-total-spend">$0.00</div>
+            <span class="metric-label">Total Debit Spend</span>
+          </div>
+
+          <!-- Ledger Data Visual chart -->
+          <div class="card" style="grid-column: span 8;">
+            <div class="card-header">
+              <h3 class="card-title">Expenditures by Category</h3>
+            </div>
+            <div style="height: 160px; position: relative;">
+              <canvas id="ledgerChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data table ledgers -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Accounts Transactions Ledger</h3>
+          </div>
+          
+          <div class="filter-row">
+            <input type="text" class="search-filter-input" id="ledger-search-filter" placeholder="Search accounts...">
+            <select class="dropdown-filter" id="ledger-type-filter">
+              <option value="ALL">All Types</option>
+              <option value="DEBIT">Debit</option>
+              <option value="CREDIT">Credit</option>
+            </select>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table" id="ledger-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Date</th>
+                  <th>Account Name</th>
+                  <th>Description</th>
+                  <th>Category</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================================
+      // VIEW 4: QA TESTING CENTER
+      // ============================================================================ -->
+      <section class="tab-view" id="tab-qa">
+        <div class="card-grid">
+          <!-- Left Column Ingestion Form -->
+          <div class="card" style="grid-column: span 5;">
+            <div class="card-header">
+              <h3 class="card-title">Ingest Technical Test Log</h3>
+            </div>
+            <form id="form-qa-ingest">
+              <div class="form-group">
+                <label class="form-label" for="qa-component-id">Component ID</label>
+                <input type="text" class="form-control" id="qa-component-id" placeholder="e.g. PCB-BOARD-A4" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="qa-engineer">Testing Engineer</label>
+                <input type="text" class="form-control" id="qa-engineer" placeholder="e.g. Alice Vance" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="qa-result">Test Outcome</label>
+                <select class="form-control form-select" id="qa-result" required>
+                  <option value="PASS">PASS</option>
+                  <option value="FAIL">FAIL</option>
+                  <option value="INCONCLUSIVE">INCONCLUSIVE</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="qa-content">Unstructured Log Text</label>
+                <textarea class="form-control" id="qa-content" rows="4" placeholder="Detail the physical test observations, parameters, failures, or behaviors..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary" id="btn-ingest-submit" style="width: 100%; justify-content: center;">
+                Save & Vectorize Log
+              </button>
+            </form>
+          </div>
+
+          <!-- Right QA Distribution Chart -->
+          <div class="card" style="grid-column: span 7;">
+            <div class="card-header">
+              <h3 class="card-title">Test Results Breakdown</h3>
+            </div>
+            <div style="height: 290px; position: relative; display: flex; align-items: center; justify-content: center;">
+              <canvas id="qaChart" style="max-height: 270px;"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- QA Unstructured log list -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Ingested Technical Testing Sheets</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="qa-table">
+              <thead>
+                <tr>
+                  <th>Log ID</th>
+                  <th>Component</th>
+                  <th>Engineer</th>
+                  <th>Unstructured Log Content</th>
+                  <th>Outcome</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
-  <!-- Voice Overlay -->
+  <!-- Voice recording overlay -->
   <div class="voice-overlay" id="voice-overlay">
-    <div class="wave-container">
-      <div class="wave-bar"></div>
+    <div class="wave-wrapper">
       <div class="wave-bar"></div>
       <div class="wave-bar"></div>
       <div class="wave-bar"></div>
@@ -851,48 +1266,89 @@
       <div class="wave-bar"></div>
       <div class="wave-bar"></div>
     </div>
-    <div class="voice-instruction" id="voice-instruction">Listening... Speak Now</div>
-    <div class="voice-transcription" id="voice-transcription">Tap mic to stop recording and route search</div>
+    <div class="voice-status" id="voice-status">Listening... Speak Now</div>
+    <div class="voice-prompt">Tap background to stop and search</div>
   </div>
 
-  <!-- Toast -->
+  <!-- Status Toast -->
   <div class="toast" id="toast">
-    <span id="toast-text">Notification message</span>
+    <span id="toast-text">Message</span>
   </div>
 
   <!-- Client JavaScript Logic -->
   <script>
-    // Elements
+    // Tab switching state
+    const sidebar = document.getElementById('sidebar');
+    const btnCollapse = document.getElementById('btn-collapse');
+    const pageTitle = document.getElementById('page-title');
     const searchInput = document.getElementById('search-input');
     const btnSearch = document.getElementById('btn-search');
     const btnMic = document.getElementById('btn-mic');
     const btnSeed = document.getElementById('btn-seed');
     const statusText = document.getElementById('status-text');
-    const statusDot = document.getElementById('status-dot');
     const envBadge = document.getElementById('env-badge');
-    const emptyState = document.getElementById('empty-state');
-    const resultsGrid = document.getElementById('results-grid');
-    const rawAccordion = document.getElementById('raw-accordion');
-    const accordionToggle = document.getElementById('accordion-toggle');
-    const rawJson = document.getElementById('raw-json');
-    
-    // Result panels
+    const searchResultsGrid = document.getElementById('search-results-grid');
+    const reportText = document.getElementById('report-text');
     const metaDept = document.getElementById('meta-dept');
     const metaTool = document.getElementById('meta-tool');
     const metaArgs = document.getElementById('meta-args');
-    const reportText = document.getElementById('report-text');
-    
-    // Voice elements
+    const inspectJson = document.getElementById('inspect-json');
+    const inspectAccordion = document.getElementById('inspect-accordion');
+    const inspectToggle = document.getElementById('inspect-toggle');
     const voiceOverlay = document.getElementById('voice-overlay');
-    const voiceInstruction = document.getElementById('voice-instruction');
-    const voiceTranscription = document.getElementById('voice-transcription');
     
-    // Audio recording state variables
-    let mediaRecorder = null;
-    let audioChunks = [];
-    let isRecording = false;
+    // Form and Ingestion
+    const formQaIngest = document.getElementById('form-qa-ingest');
+    const btnIngestSubmit = document.getElementById('btn-ingest-submit');
+    
+    // Sidebar collapsible
+    btnCollapse.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+      document.body.classList.toggle('collapsed-sidebar');
+    });
 
-    // Toast logic
+    // Tab view router
+    const menuItems = document.querySelectorAll('.menu-item');
+    const tabViews = document.querySelectorAll('.tab-view');
+
+    menuItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // Remove active class
+        menuItems.forEach(i => i.classList.remove('active'));
+        tabViews.forEach(v => v.classList.remove('active-view'));
+        
+        // Add active class
+        item.classList.add('active');
+        const targetTab = item.getAttribute('data-tab');
+        document.getElementById(targetTab).classList.add('active-view');
+        
+        // Set Header title
+        const menuTextEl = item.querySelector('.menu-text');
+        pageTitle.textContent = menuTextEl.textContent;
+        
+        // Trigger fetch loaders if target is data panel
+        if (targetTab === 'tab-hr') loadHRData();
+        if (targetTab === 'tab-finance') loadLedgerData();
+        if (targetTab === 'tab-qa') loadQAData();
+      });
+    });
+
+    // Suggestion pills binding
+    document.querySelectorAll('.suggestion-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        searchInput.value = pill.getAttribute('data-query');
+        triggerSearch();
+      });
+    });
+
+    // Inspect Accordion Toggle
+    inspectToggle.addEventListener('click', () => {
+      inspectAccordion.classList.toggle('expanded');
+    });
+
+    // Toast Logic
     function showToast(message, type = 'success') {
       const toast = document.getElementById('toast');
       const toastText = document.getElementById('toast-text');
@@ -908,73 +1364,390 @@
       }, 4000);
     }
 
-    // Health Check on startup
+    // Health checks
     async function checkHealth() {
       try {
         const response = await fetch('/health');
         const data = await response.json();
-        
         if (response.ok) {
-          statusText.textContent = data.database.includes('mock') ? 'Sandbox / Mock Mode' : 'Connected / Production';
-          statusDot.className = 'status-dot';
-          envBadge.textContent = data.database.includes('mock') ? 'Mock' : 'Active';
-          envBadge.style.color = data.database.includes('mock') ? '#f59e0b' : '#34d399';
-          envBadge.style.borderColor = data.database.includes('mock') ? 'rgba(245, 158, 11, 0.3)' : 'rgba(52, 211, 153, 0.3)';
+          const isMock = data.database.includes('mock');
+          statusText.textContent = isMock ? 'Sandbox Mode' : 'Supabase Active';
+          envBadge.textContent = isMock ? 'Sandbox' : 'Production';
+          envBadge.className = isMock ? 'header-badge' : 'header-badge active-badge';
         } else {
-          statusText.textContent = 'Degraded / No Database';
-          statusDot.style.backgroundColor = '#ef4444';
-          statusDot.style.boxShadow = '0 0 10px #ef4444';
+          statusText.textContent = 'Degraded';
         }
       } catch (err) {
-        statusText.textContent = 'Server Offline';
-        statusDot.style.backgroundColor = '#ef4444';
-        statusDot.style.boxShadow = '0 0 10px #ef4444';
+        statusText.textContent = 'Offline';
       }
     }
-
     checkHealth();
 
-    // Seeding trigger
+    // Re-seed DB
     btnSeed.addEventListener('click', async () => {
       btnSeed.classList.add('spinning');
-      statusText.textContent = 'Seeding database...';
-      statusDot.className = 'status-dot loading';
-      
+      statusText.textContent = 'Seeding...';
       try {
         const response = await fetch('/api/seed', { method: 'POST' });
         const data = await response.json();
-        
         if (response.ok) {
-          showToast('Database successfully seeded with fresh ERP mock entries!', 'success');
+          showToast('ERP tables successfully populated with fresh records!', 'success');
+          // Reload active tab data
+          const activeTab = document.querySelector('.tab-view.active-view').id;
+          if (activeTab === 'tab-hr') loadHRData();
+          if (activeTab === 'tab-finance') loadLedgerData();
+          if (activeTab === 'tab-qa') loadQAData();
         } else {
           showToast(data.error || 'Failed to seed database.', 'error');
         }
       } catch (err) {
-        showToast('Connection to server failed.', 'error');
+        showToast('Connection error.', 'error');
       } finally {
         btnSeed.classList.remove('spinning');
         checkHealth();
       }
     });
 
-    // Toggle raw inspect accordion
-    accordionToggle.addEventListener('click', () => {
-      rawAccordion.classList.toggle('expanded');
-    });
+    // ============================================================================
+    // TAB loaders & Chart.js Virtualization
+    // ============================================================================
+    
+    // Globals to store charts so we can destroy/rebuild without canvas errors
+    let hrChart = null;
+    let ledgerChart = null;
+    let qaChart = null;
 
-    // Suggestion pills binding
-    document.querySelectorAll('.suggestion-pill').forEach(pill => {
-      pill.addEventListener('click', () => {
-        searchInput.value = pill.getAttribute('data-query');
-        triggerSearch();
+    // Loader 1: HR Directory
+    let allEmployees = [];
+    async function loadHRData() {
+      try {
+        const response = await fetch('/api/employees');
+        allEmployees = await response.json();
+        document.getElementById('hr-count-val').textContent = allEmployees.length;
+        renderHRTable(allEmployees);
+        renderHRChart(allEmployees);
+      } catch (err) {
+        console.error('HR Directory load failed:', err);
+      }
+    }
+
+    function renderHRTable(data) {
+      const tbody = document.querySelector('#hr-table tbody');
+      tbody.innerHTML = '';
+      
+      data.forEach(emp => {
+        const tr = document.createElement('tr');
+        const deptBadge = `<span class="badge-dept ${emp.department.toLowerCase()}">${emp.department}</span>`;
+        const activeBadge = emp.is_active 
+          ? `<span style="color: var(--success); font-weight:600;">ACTIVE</span>` 
+          : `<span style="color: var(--text-light);">INACTIVE</span>`;
+          
+        tr.innerHTML = `
+          <td>${emp.employee_id}</td>
+          <td style="font-weight: 500;">${emp.first_name} ${emp.last_name}</td>
+          <td>${emp.email}</td>
+          <td>${deptBadge}</td>
+          <td>${emp.role}</td>
+          <td>${new Date(emp.hire_date).toLocaleDateString()}</td>
+          <td>${activeBadge}</td>
+        `;
+        tbody.appendChild(tr);
       });
+    }
+
+    function renderHRChart(employees) {
+      const depts = {};
+      employees.forEach(e => {
+        depts[e.department] = (depts[e.department] || 0) + 1;
+      });
+      
+      const ctx = document.getElementById('hrChart').getContext('2d');
+      if (hrChart) hrChart.destroy();
+      
+      hrChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(depts),
+          datasets: [{
+            label: 'Staff Count',
+            data: Object.values(depts),
+            backgroundColor: 'rgba(2, 132, 199, 0.65)',
+            borderColor: '#0284c7',
+            borderWidth: 1.5,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { precision: 0 } }
+          }
+        }
+      });
+    }
+
+    // HR Search filters
+    document.getElementById('hr-search-filter').addEventListener('input', filterHR);
+    document.getElementById('hr-dept-filter').addEventListener('change', filterHR);
+
+    function filterHR() {
+      const query = document.getElementById('hr-search-filter').value.toLowerCase();
+      const dept = document.getElementById('hr-dept-filter').value;
+      
+      const filtered = allEmployees.filter(emp => {
+        const matchQuery = `${emp.first_name} ${emp.last_name}`.toLowerCase().includes(query) || emp.email.toLowerCase().includes(query) || emp.role.toLowerCase().includes(query);
+        const matchDept = dept === 'ALL' || emp.department === dept;
+        return matchQuery && matchDept;
+      });
+      
+      renderHRTable(filtered);
+    }
+
+    // Loader 2: Financial Ledger
+    let allLedgers = [];
+    async function loadLedgerData() {
+      try {
+        const response = await fetch('/api/ledgers');
+        allLedgers = await response.json();
+        
+        // Calculate total spend
+        const spend = allLedgers
+          .filter(l => l.type === 'DEBIT')
+          .reduce((sum, item) => sum + parseFloat(item.amount), 0);
+          
+        document.getElementById('ledger-total-spend').textContent = `$${spend.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        
+        renderLedgerTable(allLedgers);
+        renderLedgerChart(allLedgers);
+      } catch (err) {
+        console.error('Ledgers load failed:', err);
+      }
+    }
+
+    function renderLedgerTable(data) {
+      const tbody = document.querySelector('#ledger-table tbody');
+      tbody.innerHTML = '';
+      
+      data.forEach(item => {
+        const tr = document.createElement('tr');
+        const typeBadge = `<span class="badge-type ${item.type.toLowerCase()}">${item.type}</span>`;
+        tr.innerHTML = `
+          <td>${item.ledger_id}</td>
+          <td>${new Date(item.transaction_date).toLocaleDateString()}</td>
+          <td style="font-weight: 500;">${item.account_name}</td>
+          <td>${item.description}</td>
+          <td>${item.category}</td>
+          <td>${typeBadge}</td>
+          <td style="font-weight: 600; font-family: var(--font-mono); text-align: right;">
+            $${parseFloat(item.amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderLedgerChart(ledgers) {
+      const categories = {};
+      ledgers.forEach(l => {
+        if (l.type === 'DEBIT') {
+          categories[l.category] = (categories[l.category] || 0) + parseFloat(l.amount);
+        }
+      });
+      
+      const ctx = document.getElementById('ledgerChart').getContext('2d');
+      if (ledgerChart) ledgerChart.destroy();
+      
+      ledgerChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(categories),
+          datasets: [{
+            data: Object.values(categories),
+            backgroundColor: [
+              'rgba(14, 148, 136, 0.7)',  /* Teal */
+              'rgba(139, 92, 246, 0.7)', /* Violet */
+              'rgba(244, 63, 94, 0.7)',  /* Rose */
+              'rgba(2, 132, 199, 0.7)'   /* Sky */
+            ],
+            borderColor: '#ffffff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right', labels: { boxWidth: 12, font: { family: 'Inter' } } }
+          }
+        }
+      });
+    }
+
+    // Ledger filters
+    document.getElementById('ledger-search-filter').addEventListener('input', filterLedger);
+    document.getElementById('ledger-type-filter').addEventListener('change', filterLedger);
+
+    function filterLedger() {
+      const query = document.getElementById('ledger-search-filter').value.toLowerCase();
+      const type = document.getElementById('ledger-type-filter').value;
+      
+      const filtered = allLedgers.filter(l => {
+        const matchQuery = l.account_name.toLowerCase().includes(query) || l.description.toLowerCase().includes(query) || l.category.toLowerCase().includes(query);
+        const matchType = type === 'ALL' || l.type === type;
+        return matchQuery && matchType;
+      });
+      
+      renderLedgerTable(filtered);
+    }
+
+    // Loader 3: QA Testing
+    let allLogs = [];
+    async function loadQAData() {
+      try {
+        const response = await fetch('/api/logs');
+        allLogs = await response.json();
+        renderQATable(allLogs);
+        renderQAChart(allLogs);
+      } catch (err) {
+        console.error('QA Directory load failed:', err);
+      }
+    }
+
+    function renderQATable(data) {
+      const tbody = document.querySelector('#qa-table tbody');
+      tbody.innerHTML = '';
+      
+      data.forEach(log => {
+        const tr = document.createElement('tr');
+        const outcomeBadge = `<span class="badge-status ${log.test_result.toLowerCase()}">${log.test_result}</span>`;
+        tr.innerHTML = `
+          <td>${log.log_id}</td>
+          <td style="font-weight: 600;">${log.component_id}</td>
+          <td>${log.testing_engineer}</td>
+          <td style="max-width: 450px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${log.content}">${log.content}</td>
+          <td>${outcomeBadge}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderQAChart(logs) {
+      const results = { PASS: 0, FAIL: 0, INCONCLUSIVE: 0 };
+      logs.forEach(l => {
+        results[l.test_result] = (results[l.test_result] || 0) + 1;
+      });
+      
+      const ctx = document.getElementById('qaChart').getContext('2d');
+      if (qaChart) qaChart.destroy();
+      
+      qaChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(results),
+          datasets: [{
+            data: Object.values(results),
+            backgroundColor: [
+              'rgba(16, 185, 129, 0.75)', /* Pass Green */
+              'rgba(239, 68, 68, 0.75)',  /* Fail Red */
+              'rgba(245, 158, 11, 0.75)'  /* Warn Yellow */
+            ],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12 } }
+          }
+        }
+      });
+    }
+
+    // QA Log Ingestion Submission handler
+    formQaIngest.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const component_id = document.getElementById('qa-component-id').value.trim();
+      const testing_engineer = document.getElementById('qa-engineer').value.trim();
+      const test_result = document.getElementById('qa-result').value;
+      const content = document.getElementById('qa-content').value.trim();
+      
+      btnIngestSubmit.disabled = true;
+      btnIngestSubmit.textContent = 'Saving & Vectorizing...';
+      
+      try {
+        const response = await fetch('/api/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ component_id, testing_engineer, test_result, content })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showToast('QA Test Sheet successfully ingested, vectorized via NeMo, and saved!', 'success');
+          formQaIngest.reset();
+          loadQAData();
+        } else {
+          showToast(data.error || 'Failed to ingest QA sheet.', 'error');
+        }
+      } catch (err) {
+        showToast('Connection to backend failed.', 'error');
+      } finally {
+        btnIngestSubmit.disabled = false;
+        btnIngestSubmit.textContent = 'Save & Vectorize Log';
+      }
     });
 
-    // Bind search action
+    // ============================================================================
+    // AI Search Core Logic (Tab 1)
+    // ============================================================================
     btnSearch.addEventListener('click', () => triggerSearch());
-    searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') triggerSearch();
-    });
+    searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') triggerSearch(); });
+
+    async function triggerSearch() {
+      const query = searchInput.value.trim();
+      if (!query) return;
+      
+      searchResultsGrid.style.display = 'grid';
+      reportText.innerHTML = `
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-text" style="width: 90%;"></div>
+        <div class="skeleton skeleton-text" style="width: 85%;"></div>
+        <div class="skeleton skeleton-text" style="width: 95%;"></div>
+        <div class="skeleton skeleton-text" style="width: 60%;"></div>
+      `;
+      
+      metaDept.textContent = 'Orchestrating...';
+      metaTool.textContent = 'Routing...';
+      metaArgs.textContent = '{}';
+      inspectJson.textContent = '[]';
+      
+      try {
+        const response = await fetch('/api/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userPrompt: query })
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+          const dept = data.routedDepartment || 'None';
+          metaDept.textContent = dept;
+          metaTool.textContent = data.toolUsed || 'Direct Synthesis';
+          metaArgs.textContent = JSON.stringify(data.arguments, null, 2);
+          reportText.innerHTML = parseMarkdown(data.summary);
+          inspectJson.textContent = JSON.stringify(data.results || data, null, 2);
+        } else {
+          reportText.innerHTML = `<p style="color: var(--error);">Error executing query: ${data.error || 'Unknown server error'}</p>`;
+        }
+      } catch (err) {
+        reportText.innerHTML = `<p style="color: var(--error);">Network connection to server failed.</p>`;
+      }
+    }
 
     // Helper: Basic Markdown Parser for HTML rendering
     function parseMarkdown(md) {
@@ -996,12 +1769,9 @@
       // Bullet points
       html = html.replace(/^\s*-\s+(.*$)/gim, '<li>$1</li>');
       html = html.replace(/^\s*\*\s+(.*$)/gim, '<li>$1</li>');
-      
-      // Wrap list items in ul
-      // Look for sequences of <li>...</li> and wrap them in <ul>
       html = html.replace(/((?:<li>.*?<\/li>\s*)+)/gim, '<ul>$1</ul>');
       
-      // Paragraphs (split by double lines and wrap in p if not headers/lists)
+      // Paragraphs & Tables
       const blocks = html.split(/\n\n+/);
       const formattedBlocks = blocks.map(block => {
         const trimmed = block.trim();
@@ -1010,14 +1780,13 @@
           return trimmed;
         }
         
-        // Simple table parser
         if (trimmed.includes('|')) {
           const lines = trimmed.split('\n');
           let tableHtml = '<table>';
           let hasHeader = false;
           
           lines.forEach(line => {
-            if (line.includes('|-') || line.includes('| -')) return; // skip divider lines
+            if (line.includes('|-') || line.includes('| -')) return;
             const cells = line.split('|').map(c => c.trim()).filter(c => c !== '');
             if (cells.length === 0) return;
             
@@ -1038,71 +1807,13 @@
       return formattedBlocks.join('\n');
     }
 
-    // Trigger Core Text Search query
-    async function triggerSearch() {
-      const query = searchInput.value.trim();
-      if (!query) return;
-
-      // Show skeleton state
-      emptyState.style.display = 'none';
-      resultsGrid.classList.add('visible');
-      rawAccordion.classList.add('visible');
-      
-      reportText.innerHTML = `
-        <div class="skeleton skeleton-title"></div>
-        <div class="skeleton skeleton-text" style="width: 90%;"></div>
-        <div class="skeleton skeleton-text" style="width: 85%;"></div>
-        <div class="skeleton skeleton-text" style="width: 95%;"></div>
-        <div class="skeleton skeleton-text" style="width: 60%;"></div>
-      `;
-      
-      metaDept.textContent = 'Orchestrating...';
-      metaDept.className = 'badge-dept none';
-      metaTool.textContent = 'Llama 3.3 routing...';
-      metaArgs.textContent = '{}';
-      rawJson.textContent = '[]';
-
-      try {
-        const response = await fetch('/api/query', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userPrompt: query })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-          // Fill metadata panel
-          const dept = data.routedDepartment || 'None';
-          metaDept.textContent = dept;
-          
-          // Badge colors
-          let deptClass = 'badge-dept ';
-          if (dept.toLowerCase().includes('hr')) deptClass += 'hr';
-          else if (dept.toLowerCase().includes('account')) deptClass += 'ca';
-          else if (dept.toLowerCase().includes('qa') || dept.toLowerCase().includes('product')) deptClass += 'qa';
-          else deptClass += 'none';
-          metaDept.className = deptClass;
-          
-          metaTool.textContent = data.toolUsed || 'Direct Synthesis';
-          metaArgs.textContent = JSON.stringify(data.arguments, null, 2);
-          
-          // Render markdown report
-          reportText.innerHTML = parseMarkdown(data.summary);
-          
-          // Render raw json
-          rawJson.textContent = JSON.stringify(data.results || data, null, 2);
-        } else {
-          reportText.innerHTML = `<p style="color: var(--error);">Error executing query: ${data.error || 'Unknown server error'}</p>`;
-        }
-      } catch (err) {
-        reportText.innerHTML = `<p style="color: var(--error);">Network connection to backend failed.</p>`;
-      }
-    }
-
     // ============================================================================
-    // Voice Search Microphone Audio Recording (MediaRecorder API)
+    // Browser Voice Search Audio Recording (MediaRecorder API)
     // ============================================================================
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+
     btnMic.addEventListener('click', async () => {
       if (isRecording) {
         stopRecording();
@@ -1113,7 +1824,6 @@
         audioChunks = [];
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         
-        // Start recording WebM audio stream
         mediaRecorder = new MediaRecorder(stream);
         mediaRecorder.ondataavailable = (event) => {
           if (event.data.size > 0) {
@@ -1123,9 +1833,9 @@
         
         mediaRecorder.onstop = async () => {
           const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-          voiceInstruction.textContent = 'ASR Core Transcribing...';
+          voiceOverlay.classList.remove('active');
+          showToast('Transcribing audio via Riva ASR...', 'success');
           
-          // Construct form-data upload package
           const formData = new FormData();
           formData.append('file', audioBlob, 'speech.webm');
           
@@ -1139,65 +1849,45 @@
             if (response.ok) {
               searchInput.value = data.query || '';
               
-              // Fill metadata panels
+              // Render results
+              searchResultsGrid.style.display = 'grid';
               const dept = data.routedDepartment || 'None';
               metaDept.textContent = dept;
-              let deptClass = 'badge-dept ';
-              if (dept.toLowerCase().includes('hr')) deptClass += 'hr';
-              else if (dept.toLowerCase().includes('account')) deptClass += 'ca';
-              else if (dept.toLowerCase().includes('qa') || dept.toLowerCase().includes('product')) deptClass += 'qa';
-              else deptClass += 'none';
-              metaDept.className = deptClass;
-              
               metaTool.textContent = data.toolUsed || 'Direct Synthesis';
               metaArgs.textContent = JSON.stringify(data.arguments, null, 2);
               reportText.innerHTML = parseMarkdown(data.summary || data.message);
-              rawJson.textContent = JSON.stringify(data.results || data, null, 2);
+              inspectJson.textContent = JSON.stringify(data.results || data, null, 2);
               
-              emptyState.style.display = 'none';
-              resultsGrid.classList.add('visible');
-              rawAccordion.classList.add('visible');
-              
-              showToast('ASR transcript processed successfully!', 'success');
+              showToast('ASR query orchestrated successfully!', 'success');
             } else {
-              showToast(data.error || 'Voice search processing failed.', 'error');
+              showToast(data.error || 'Voice query failed.', 'error');
             }
           } catch (err) {
-            showToast('ASR pipeline server connection failed.', 'error');
+            showToast('Voice connection error.', 'error');
           } finally {
-            voiceOverlay.classList.remove('active');
-            // Close media tracks
             stream.getTracks().forEach(track => track.stop());
           }
         };
 
-        // Start MediaRecorder
         mediaRecorder.start();
         isRecording = true;
-        btnMic.classList.add('active-mic');
+        btnMic.classList.add('recording');
         voiceOverlay.classList.add('active');
-        voiceInstruction.textContent = 'Listening... Speak Now';
-        voiceTranscription.textContent = 'Click anywhere on the background to stop and search';
         
       } catch (err) {
-        showToast('Microphone access denied or audio hardware not found.', 'error');
-        console.error(err);
+        showToast('Microphone hardware access denied.', 'error');
       }
     });
 
-    // Stop audio recording
     function stopRecording() {
       if (mediaRecorder && isRecording) {
         mediaRecorder.stop();
         isRecording = false;
-        btnMic.classList.remove('active-mic');
+        btnMic.classList.remove('recording');
       }
     }
 
-    // Stop recording if user clicks anywhere on the dark overlay background
-    voiceOverlay.addEventListener('click', () => {
-      stopRecording();
-    });
+    voiceOverlay.addEventListener('click', () => stopRecording());
   </script>
 </body>
 </html>

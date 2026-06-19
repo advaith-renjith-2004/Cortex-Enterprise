@@ -158,6 +158,95 @@ app.post('/api/seed', async (req: Request, res: Response) => {
 });
 
 // ============================================================================
+// Data Management API Endpoints
+// ============================================================================
+
+app.get('/api/employees', async (req: Request, res: Response) => {
+  if (isSupabaseMock) {
+    return res.json([
+      { employee_id: 1, first_name: 'Alice', last_name: 'Vance', email: 'alice.vance@cortex-enterprise.io', phone: '555-0192', department: 'QA', role: 'Lead Test Engineer', is_active: true },
+      { employee_id: 2, first_name: 'Bob', last_name: 'Miller', email: 'bob.miller@cortex-enterprise.io', phone: '555-0143', department: 'Production', role: 'Mechanical Designer', is_active: true },
+      { employee_id: 3, first_name: 'Charlie', last_name: 'Smith', email: 'charlie.smith@cortex-enterprise.io', phone: '555-0188', department: 'Accounting', role: 'Senior Auditor', is_active: true },
+    ]);
+  }
+  try {
+    const { data, error } = await supabase.from('employees').select('*').order('last_name', { ascending: true });
+    if (error) throw error;
+    return res.json(data || []);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/ledgers', async (req: Request, res: Response) => {
+  if (isSupabaseMock) {
+    return res.json([
+      { ledger_id: 101, transaction_date: '2026-06-17', account_name: 'Office Supplies Depot', description: 'Ergonomic chairs for developers', amount: 750.00, type: 'DEBIT', category: 'Office Supplies' },
+      { ledger_id: 102, transaction_date: '2026-06-16', account_name: 'CloudHosting Corp', description: 'Production server hosting fee', amount: 2400.00, type: 'DEBIT', category: 'Infrastructure' },
+      { ledger_id: 103, transaction_date: '2026-06-15', account_name: 'Marketing Spark LLC', description: 'Campaign Retainer Fees', amount: 5000.00, type: 'DEBIT', category: 'Advertising' },
+    ]);
+  }
+  try {
+    const { data, error } = await supabase.from('ledgers').select('*').order('transaction_date', { ascending: false });
+    if (error) throw error;
+    return res.json(data || []);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/logs', async (req: Request, res: Response) => {
+  if (isSupabaseMock) {
+    return res.json([
+      { log_id: 1, component_id: 'TITAN-CHASSIS-009', testing_engineer: 'Alice Vance', content: 'Thermal stress chamber test started at 50C. Temperature ramped to 85C over 2 hours. Slight metal expansion observed but structural boundaries remained intact. Structural compliance passed.', test_result: 'PASS' },
+      { log_id: 2, component_id: 'PCB-BOARD-A4', testing_engineer: 'Alice Vance', content: 'Circuit continuity check failed on the secondary layer. High resistance noted on trace pin 14. Potential copper bridging causing short circuit under voltage load.', test_result: 'FAIL' },
+    ]);
+  }
+  try {
+    const { data, error } = await supabase.from('technical_logs').select('log_id, component_id, testing_engineer, content, test_result, logged_at').order('logged_at', { ascending: false });
+    if (error) throw error;
+    return res.json(data || []);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/logs', async (req: Request, res: Response) => {
+  const { component_id, testing_engineer, content, test_result } = req.body;
+
+  if (!component_id || !testing_engineer || !content || !test_result) {
+    return res.status(400).json({ error: 'Missing log ingestion parameters (component_id, testing_engineer, content, test_result).' });
+  }
+
+  if (isSupabaseMock) {
+    return res.json({ status: 'success', message: 'Log successfully ingested (mock mode).' });
+  }
+
+  try {
+    console.log(`[Cortex Server] Ingesting QA Log for component ${component_id}...`);
+    // Vectorize using nv-embedqa-e5-v5
+    const embedding = await getEmbedding(content, 'passage');
+    
+    const { data, error } = await supabase.from('technical_logs').insert([
+      {
+        component_id,
+        testing_engineer,
+        content,
+        embedding,
+        test_result,
+      }
+    ]);
+
+    if (error) throw error;
+
+    return res.json({ status: 'success', message: 'Log successfully ingested and vectorized in Supabase.' });
+  } catch (err: any) {
+    console.error('[Cortex Server Log Ingestion Failed]:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// ============================================================================
 // Server Init
 // ============================================================================
 app.listen(port, () => {
