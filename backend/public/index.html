@@ -6168,7 +6168,9 @@
       const tbody = document.querySelector('#admin-employee-table tbody');
       tbody.innerHTML = '';
       
-      employees.forEach(emp => {
+      const sortedEmployees = [...employees].sort((a, b) => a.employee_id - b.employee_id);
+      
+      sortedEmployees.forEach(emp => {
         const tr = document.createElement('tr');
         const statusClass = emp.is_active ? 'pass' : 'failed';
         const statusText = emp.is_active ? 'ACTIVE' : 'INACTIVE';
