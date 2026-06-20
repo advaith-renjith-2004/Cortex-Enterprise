@@ -198,6 +198,17 @@ const requireCEO = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
+const requireCEOOrSelf = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Unauthorized.' });
+  }
+  const empId = parseInt(req.params.id);
+  if (req.user.role === 'CEO' || req.user.department === 'Administration' || req.user.employee_id === empId) {
+    return next();
+  }
+  return res.status(403).json({ error: 'Access restricted to CEO, Administrators, or the employee themselves.' });
+};
+
 const requireDepartment = (allowedDepts: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
@@ -742,7 +753,7 @@ app.post('/api/employees', requireCEO, async (req: Request, res: Response) => {
   }
 });
 
-app.put('/api/employees/:id', requireCEO, async (req: Request, res: Response) => {
+app.put('/api/employees/:id', requireCEOOrSelf, async (req: Request, res: Response) => {
   const empId = parseInt(req.params.id);
   const { first_name, last_name, email, phone, department, role, street_address, city, state, zip_code, country, is_active, hire_date } = req.body;
 

@@ -3502,27 +3502,63 @@
             </div>
           </div>
 
-          <h5 class="profile-section-heading">Address Details</h5>
-          <div class="profile-details-grid" style="grid-template-columns: 1fr;">
-            <div class="detail-cell">
-              <div class="detail-label">Street Address</div>
-              <div class="detail-val" id="modal-profile-street">777 Enterprise Drive</div>
+          <h5 class="profile-section-heading" style="display: flex; justify-content: space-between; align-items: center;">
+            Address Details
+            <button id="btn-edit-profile-address" class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.65rem; border-color: var(--border-color); color: var(--text-muted);">Edit Details</button>
+          </h5>
+          <div id="profile-address-view">
+            <div class="profile-details-grid" style="grid-template-columns: 1fr;">
+              <div class="detail-cell">
+                <div class="detail-label">Street Address</div>
+                <div class="detail-val" id="modal-profile-street">Not Provided</div>
+              </div>
+            </div>
+            <div class="profile-details-grid">
+              <div class="detail-cell">
+                <div class="detail-label">City</div>
+                <div class="detail-val" id="modal-profile-city">-</div>
+              </div>
+              <div class="detail-cell">
+                <div class="detail-label">State & PIN</div>
+                <div class="detail-val" id="modal-profile-state-zip">-, -</div>
+              </div>
+              <div class="detail-cell">
+                <div class="detail-label">Country</div>
+                <div class="detail-val" id="modal-profile-country">-</div>
+              </div>
             </div>
           </div>
-          <div class="profile-details-grid">
-            <div class="detail-cell">
-              <div class="detail-label">City</div>
-              <div class="detail-val" id="modal-profile-city">San Francisco</div>
+          
+          <form id="profile-address-edit" style="display: none; display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+            <div class="form-group">
+              <label class="form-label" style="font-size:0.7rem; margin-bottom:0.2rem;">Street Address</label>
+              <input type="text" class="form-control" id="edit-profile-street" placeholder="14, Koramangala 3rd Block" style="font-size:0.75rem; padding: 0.3rem 0.5rem;">
             </div>
-            <div class="detail-cell">
-              <div class="detail-label">State & ZIP</div>
-              <div class="detail-val" id="modal-profile-state-zip">CA, 94105</div>
+            <div style="display: flex; gap: 0.5rem;">
+              <div class="form-group" style="flex: 1;">
+                <label class="form-label" style="font-size:0.7rem; margin-bottom:0.2rem;">City</label>
+                <input type="text" class="form-control" id="edit-profile-city" placeholder="Bengaluru" style="font-size:0.75rem; padding: 0.3rem 0.5rem;">
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label class="form-label" style="font-size:0.7rem; margin-bottom:0.2rem;">State</label>
+                <input type="text" class="form-control" id="edit-profile-state" placeholder="Karnataka" style="font-size:0.75rem; padding: 0.3rem 0.5rem;">
+              </div>
             </div>
-            <div class="detail-cell">
-              <div class="detail-label">Country</div>
-              <div class="detail-val" id="modal-profile-country">USA</div>
+            <div style="display: flex; gap: 0.5rem;">
+              <div class="form-group" style="flex: 1;">
+                <label class="form-label" style="font-size:0.7rem; margin-bottom:0.2rem;">PIN Code</label>
+                <input type="text" class="form-control" id="edit-profile-zip" placeholder="560034" style="font-size:0.75rem; padding: 0.3rem 0.5rem;">
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label class="form-label" style="font-size:0.7rem; margin-bottom:0.2rem;">Country</label>
+                <input type="text" class="form-control" id="edit-profile-country" placeholder="India" style="font-size:0.75rem; padding: 0.3rem 0.5rem;">
+              </div>
             </div>
-          </div>
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.5rem;">
+              <button type="button" class="btn btn-outline" id="btn-cancel-profile-address" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="btn-save-profile-address" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">Save Changes</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -3932,9 +3968,86 @@
       document.getElementById('modal-profile-state-zip').textContent = `${emp.state || '-'}, ${emp.zip_code || '-'}`;
       document.getElementById('modal-profile-country').textContent = emp.country || '-';
       
+      // Store currently viewed employee globally for the edit form
+      window.currentViewedEmployee = emp;
+      
+      // Reset edit view if it was left open
+      document.getElementById('profile-address-view').style.display = 'block';
+      document.getElementById('profile-address-edit').style.display = 'none';
+      
       // Toggle visibility active
       profileModalOverlay.classList.add('active');
     }
+
+    // Edit Profile Address Logic
+    document.getElementById('btn-edit-profile-address').addEventListener('click', () => {
+      if (!window.currentViewedEmployee) return;
+      const emp = window.currentViewedEmployee;
+      
+      // Pre-fill inputs
+      document.getElementById('edit-profile-street').value = emp.street_address || '';
+      document.getElementById('edit-profile-city').value = emp.city || '';
+      document.getElementById('edit-profile-state').value = emp.state || '';
+      document.getElementById('edit-profile-zip').value = emp.zip_code || '';
+      document.getElementById('edit-profile-country').value = emp.country || '';
+      
+      // Toggle views
+      document.getElementById('profile-address-view').style.display = 'none';
+      document.getElementById('profile-address-edit').style.display = 'flex';
+    });
+
+    document.getElementById('btn-cancel-profile-address').addEventListener('click', () => {
+      document.getElementById('profile-address-edit').style.display = 'none';
+      document.getElementById('profile-address-view').style.display = 'block';
+    });
+
+    document.getElementById('profile-address-edit').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emp = window.currentViewedEmployee;
+      if (!emp) return;
+      
+      const payload = {
+        street_address: document.getElementById('edit-profile-street').value,
+        city: document.getElementById('edit-profile-city').value,
+        state: document.getElementById('edit-profile-state').value,
+        zip_code: document.getElementById('edit-profile-zip').value,
+        country: document.getElementById('edit-profile-country').value
+      };
+      
+      const btnSave = document.getElementById('btn-save-profile-address');
+      btnSave.disabled = true;
+      btnSave.textContent = 'Saving...';
+      
+      try {
+        const response = await fetch(`/api/employees/${emp.employee_id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!response.ok) {
+          const res = await response.json();
+          throw new Error(res.error || 'Failed to update address');
+        }
+        
+        showToast('Address Details Updated!', 'success');
+        
+        // Update local cache
+        Object.assign(emp, payload);
+        if (currentUser && currentUser.employee_id === emp.employee_id) {
+          Object.assign(currentUser, payload);
+        }
+        
+        // Re-render modal details
+        openProfileModal(`${emp.first_name} ${emp.last_name}`);
+        
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btnSave.disabled = false;
+        btnSave.textContent = 'Save Changes';
+      }
+    });
 
     // Fetch employees silently on load to populate profile metadata caches
     async function loadAllEmployeesSilently() {
