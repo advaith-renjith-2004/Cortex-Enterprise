@@ -1,4 +1,4 @@
-# 🚀 Cortex Enterprise ERP
+# Cortex Enterprise ERP
 
 Welcome to **Cortex Enterprise**! This isn't just another boring admin dashboard. It's a fully-fledged, voice-and-text-activated ERP system designed to make managing your business actually enjoyable. Think of it as your company's central nervous system—fast, smart, and locally optimized using NVIDIA NIM APIs alongside the rock-solid Supabase Postgres for all your data needs.
 
@@ -6,7 +6,7 @@ Whether you're looking up financial ledgers, tracking inventory, or digging into
 
 ---
 
-## 🏗️ How It All Fits Together
+## How It All Fits Together
 
 Here is a high-level look at how Cortex operates under the hood. We built this to be robust, secure, and incredibly fast.
 
@@ -16,7 +16,7 @@ When a user speaks or types a prompt, it's orchestrated by Meta's Llama 3.3 (pow
 
 ---
 
-## 🛠️ The Tech Stack
+## The Tech Stack
 
 We hand-picked tools that offer both power and flexibility:
 
@@ -31,7 +31,7 @@ We hand-picked tools that offer both power and flexibility:
 
 ---
 
-## 📂 Project Blueprint
+## Project Blueprint
 
 Navigating the codebase is straightforward. Here’s a quick map of where everything lives:
 
@@ -43,7 +43,7 @@ The project is split into two main sections:
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 Ready to spin it up? Here’s the quick and easy way to get Cortex running locally:
 
@@ -66,11 +66,11 @@ cd backend
 npm install
 npm run dev
 ```
-Boom! 💥 The server will boot up and start listening on `http://localhost:8000`.
+Boom! The server will boot up and start listening on `http://localhost:8000`.
 
 ---
 
-## 🔌 Using the API
+## Using the API
 
 Here are the main endpoints you'll be interacting with:
 
