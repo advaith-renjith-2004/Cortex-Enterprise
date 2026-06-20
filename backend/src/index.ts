@@ -1249,6 +1249,71 @@ app.post('/api/attendance', async (req: Request, res: Response) => {
   }
 });
 
+// 2.5 Payroll / Salary Endpoint (CEO Only)
+app.get('/api/payroll', requireCEO, async (req: Request, res: Response) => {
+  let employees: any[] = [];
+  let attendance: any[] = [];
+  
+  if (isSupabaseMock) {
+    employees = mockEmployees;
+    attendance = mockAttendance;
+  } else {
+    try {
+      const { data: empData, error: empErr } = await supabase.from('employees').select('*');
+      if (empErr) throw empErr;
+      employees = empData || [];
+      
+      const { data: attData, error: attErr } = await supabase.from('attendance').select('*');
+      if (attErr) throw attErr;
+      attendance = attData || [];
+    } catch (err: any) {
+      if (err.message && (err.message.includes('find the table') || err.message.includes('schema cache'))) {
+        console.warn('[Cortex API] Warning: missing tables for payroll. Using mock data fallback.');
+        employees = mockEmployees;
+        attendance = mockAttendance;
+      } else {
+        return res.status(500).json({ error: err.message });
+      }
+    }
+  }
+
+  const HOURLY_RATE = 1000; // base rate ₹1000/hr
+  const payroll = employees.map(emp => {
+    const empLogs = attendance.filter(a => a.employee_id === emp.employee_id);
+    let totalHours = 0;
+    
+    empLogs.forEach(log => {
+      if (log.check_in_time && log.check_out_time) {
+        const [inH, inM, inS] = log.check_in_time.split(':').map(Number);
+        const [outH, outM, outS] = log.check_out_time.split(':').map(Number);
+        
+        const inDate = new Date();
+        inDate.setHours(inH, inM, inS || 0);
+        
+        const outDate = new Date();
+        outDate.setHours(outH, outM, outS || 0);
+        
+        const diffMs = outDate.getTime() - inDate.getTime();
+        const diffHours = diffMs / (1000 * 60 * 60);
+        if (diffHours > 0) totalHours += diffHours;
+      }
+    });
+
+    return {
+      employee_id: emp.employee_id,
+      first_name: emp.first_name,
+      last_name: emp.last_name,
+      department: emp.department,
+      role: emp.role,
+      total_hours: parseFloat(totalHours.toFixed(2)),
+      hourly_rate: HOURLY_RATE,
+      total_salary: Math.round(totalHours * HOURLY_RATE)
+    };
+  });
+
+  return res.json(payroll);
+});
+
 // 3. Stock/Product Endpoints
 app.get('/api/products', requireDepartment(['Production']), async (req: Request, res: Response) => {
   if (isSupabaseMock) {
