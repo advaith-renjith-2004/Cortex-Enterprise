@@ -4025,12 +4025,16 @@
           body: JSON.stringify(payload)
         });
         
+        const resData = await response.json();
         if (!response.ok) {
-          const res = await response.json();
-          throw new Error(res.error || 'Failed to update address');
+          throw new Error(resData.error || 'Failed to update address');
         }
         
-        showToast('Address Details Updated!', 'success');
+        if (resData.warning) {
+          showToast(resData.warning, 'warning');
+        } else {
+          showToast('Address Details Updated!', 'success');
+        }
         
         // Update local cache
         Object.assign(emp, payload);

@@ -778,24 +778,30 @@ app.put('/api/employees/:id', requireCEOOrSelf, async (req: Request, res: Respon
     return res.json(emp);
   }
 
+  const updatePayload: any = {};
+  if (first_name !== undefined) updatePayload.first_name = first_name;
+  if (last_name !== undefined) updatePayload.last_name = last_name;
+  if (email !== undefined) updatePayload.email = email;
+  if (phone !== undefined) updatePayload.phone = phone;
+  if (department !== undefined) updatePayload.department = department;
+  if (role !== undefined) updatePayload.role = role;
+  if (street_address !== undefined) updatePayload.street_address = street_address;
+  if (city !== undefined) updatePayload.city = city;
+  if (state !== undefined) updatePayload.state = state;
+  if (zip_code !== undefined) updatePayload.zip_code = zip_code;
+  if (country !== undefined) updatePayload.country = country;
+  if (is_active !== undefined) updatePayload.is_active = is_active;
+  if (hire_date !== undefined) updatePayload.hire_date = hire_date;
+
+  if (Object.keys(updatePayload).length === 0) {
+    const { data } = await supabase.from('employees').select('*').eq('employee_id', empId).single();
+    return res.json(data);
+  }
+
   try {
     const { data, error } = await supabase
       .from('employees')
-      .update({
-        first_name,
-        last_name,
-        email,
-        phone,
-        department,
-        role,
-        street_address,
-        city,
-        state,
-        zip_code,
-        country,
-        is_active,
-        hire_date
-      })
+      .update(updatePayload)
       .eq('employee_id', empId)
       .select()
       .single();
@@ -805,19 +811,26 @@ app.put('/api/employees/:id', requireCEOOrSelf, async (req: Request, res: Respon
   } catch (err: any) {
     if (err.message && (err.message.includes('column') || err.message.includes('schema cache'))) {
       console.warn('[Cortex API] Warning: Address columns are missing in employees table. Falling back to core columns.');
+      
+      const fallbackPayload: any = {};
+      if (first_name !== undefined) fallbackPayload.first_name = first_name;
+      if (last_name !== undefined) fallbackPayload.last_name = last_name;
+      if (email !== undefined) fallbackPayload.email = email;
+      if (phone !== undefined) fallbackPayload.phone = phone;
+      if (department !== undefined) fallbackPayload.department = department;
+      if (role !== undefined) fallbackPayload.role = role;
+      if (is_active !== undefined) fallbackPayload.is_active = is_active;
+      if (hire_date !== undefined) fallbackPayload.hire_date = hire_date;
+
       try {
+        if (Object.keys(fallbackPayload).length === 0) {
+          const { data } = await supabase.from('employees').select('*').eq('employee_id', empId).single();
+          return res.json({ ...data, warning: 'Address fields were bypassed because database columns are missing. Please run migrations.' });
+        }
+
         const { data, error } = await supabase
           .from('employees')
-          .update({
-            first_name,
-            last_name,
-            email,
-            phone,
-            department,
-            role,
-            is_active,
-            hire_date
-          })
+          .update(fallbackPayload)
           .eq('employee_id', empId)
           .select()
           .single();
