@@ -1259,6 +1259,10 @@ app.get('/api/products', requireDepartment(['Production']), async (req: Request,
     if (error) throw error;
     return res.json(data || []);
   } catch (err: any) {
+    if (err.message && (err.message.includes('find the table') || err.message.includes('schema cache'))) {
+      console.warn('[Cortex API] Warning: products table missing. Falling back to mock data.');
+      return res.json(mockProducts);
+    }
     return res.status(500).json({ error: err.message });
   }
 });
@@ -1286,6 +1290,10 @@ app.get('/api/products/logs', requireDepartment(['Production']), async (req: Req
     }));
     return res.json(formatted);
   } catch (err: any) {
+    if (err.message && (err.message.includes('find the table') || err.message.includes('schema cache'))) {
+      console.warn('[Cortex API] Warning: stock_logs table missing. Falling back to mock data.');
+      return res.json(mockStockLogs);
+    }
     return res.status(500).json({ error: err.message });
   }
 });
