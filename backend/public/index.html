@@ -3242,6 +3242,32 @@
             </div>
           </div>
         </div>
+
+        <div class="card-grid" style="margin-top: 1.5rem;">
+          <!-- Complete Employee Roster -->
+          <div class="card" style="grid-column: span 12;">
+            <div class="card-header">
+              <h3 class="card-title">Administrative Employee Roster</h3>
+            </div>
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+              <table class="data-table" id="admin-employee-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- ============================================================================
@@ -6121,9 +6147,38 @@
         const res = await fetch('/api/admin');
         allAdmin = await res.json();
         renderAdminTable(allAdmin);
+        
+        // Also render the employee roster
+        if (!allEmployees || allEmployees.length === 0) {
+          const empRes = await fetch('/api/employees');
+          allEmployees = await empRes.json();
+        }
+        renderAdminEmployeeRoster(allEmployees);
       } catch (err) {
         console.error('Failed to load admin affairs:', err);
       }
+    }
+
+    function renderAdminEmployeeRoster(employees) {
+      const tbody = document.querySelector('#admin-employee-table tbody');
+      tbody.innerHTML = '';
+      
+      employees.forEach(emp => {
+        const tr = document.createElement('tr');
+        const statusClass = emp.is_active ? 'pass' : 'failed';
+        const statusText = emp.is_active ? 'ACTIVE' : 'INACTIVE';
+        const deptClass = emp.department ? emp.department.toLowerCase() : '';
+        
+        tr.innerHTML = `
+          <td style="font-weight: 600; color: var(--primary);">EMP-${String(emp.employee_id).padStart(3, '0')}</td>
+          <td style="font-weight: 600;">${emp.first_name} ${emp.last_name}</td>
+          <td style="font-size: 0.8rem;">${emp.email}</td>
+          <td><span class="badge-dept ${deptClass}">${emp.department}</span></td>
+          <td style="font-size: 0.8rem;">${emp.role}</td>
+          <td><span class="badge-status ${statusClass}">${statusText}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
     function renderAdminTable(data) {
