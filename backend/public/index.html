@@ -6146,7 +6146,12 @@
       try {
         const res = await fetch('/api/admin');
         allAdmin = await res.json();
-        renderAdminTable(allAdmin);
+        if (Array.isArray(allAdmin)) {
+          renderAdminTable(allAdmin);
+        } else {
+          console.warn('Admin affairs data is not an array (possibly missing table):', allAdmin);
+          renderAdminTable([]);
+        }
         
         // Also render the employee roster
         if (!allEmployees || allEmployees.length === 0) {
