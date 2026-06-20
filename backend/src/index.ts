@@ -1411,16 +1411,29 @@ app.put('/api/software/:id/status', requireDepartment(['QA']), async (req: Reque
   }
 });
 
+// Fallback cache for admin affairs when DB table is missing
+let runtimeAdminAffairs: any[] | null = null;
+
 // 5. Admin Affairs Endpoints
 app.get('/api/admin', async (req: Request, res: Response) => {
   if (isSupabaseMock) {
     return res.json(mockAdmin);
   }
+  
+  if (runtimeAdminAffairs !== null) {
+    return res.json(runtimeAdminAffairs);
+  }
+
   try {
     const { data, error } = await supabase.from('admin_affairs').select('*').order('created_at', { ascending: false });
     if (error) throw error;
     return res.json(data || []);
   } catch (err: any) {
+    if (err.message && (err.message.includes('find the table') || err.message.includes('schema cache'))) {
+      console.warn('[Cortex API] Warning: admin_affairs table missing. Initializing runtime cache.');
+      runtimeAdminAffairs = [];
+      return res.json(runtimeAdminAffairs);
+    }
     return res.status(500).json({ error: err.message });
   }
 });
@@ -1445,6 +1458,19 @@ app.post('/api/admin', requireCEO, async (req: Request, res: Response) => {
   }
 
   try {
+    if (runtimeAdminAffairs !== null) {
+      const newAffair = {
+        affair_id: runtimeAdminAffairs.length + 1,
+        title,
+        description,
+        category,
+        status: 'ACTIVE',
+        created_at: new Date().toISOString()
+      };
+      runtimeAdminAffairs.unshift(newAffair);
+      return res.json(newAffair);
+    }
+
     const { data, error } = await supabase
       .from('admin_affairs')
       .insert([{ title, description, category }])
@@ -1453,6 +1479,20 @@ app.post('/api/admin', requireCEO, async (req: Request, res: Response) => {
     if (error) throw error;
     return res.json(data);
   } catch (err: any) {
+    if (err.message && (err.message.includes('find the table') || err.message.includes('schema cache'))) {
+      console.warn('[Cortex API] Warning: admin_affairs table missing. Switching to runtime cache.');
+      runtimeAdminAffairs = [];
+      const newAffair = {
+        affair_id: 1,
+        title,
+        description,
+        category,
+        status: 'ACTIVE',
+        created_at: new Date().toISOString()
+      };
+      runtimeAdminAffairs.unshift(newAffair);
+      return res.json(newAffair);
+    }
     return res.status(500).json({ error: err.message });
   }
 });
