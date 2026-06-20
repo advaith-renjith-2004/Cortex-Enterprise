@@ -1824,9 +1824,13 @@ app.post('/api/docs', async (req: Request, res: Response) => {
 // ============================================================================
 // Server Init
 // ============================================================================
-app.listen(port, () => {
-  console.log('================================================================');
-  console.log(`[Cortex Server] Running on http://localhost:${port}`);
-  console.log(`[Cortex Server] Environment: ${isSupabaseMock ? 'MOCKED / SANDBOX' : 'PRODUCTION'}`);
-  console.log('================================================================');
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => {
+    console.log('================================================================');
+    console.log(`[Cortex Server] Running on http://localhost:${port}`);
+    console.log(`[Cortex Server] Environment: ${isSupabaseMock ? 'MOCKED / SANDBOX' : 'PRODUCTION'}`);
+    console.log('================================================================');
+  });
+}
+
+export default app;
