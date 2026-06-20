@@ -1497,6 +1497,33 @@ app.post('/api/admin', requireCEO, async (req: Request, res: Response) => {
   }
 });
 
+app.delete('/api/admin/:id', requireCEO, async (req: Request, res: Response) => {
+  const affairId = parseInt(req.params.id);
+
+  if (isSupabaseMock) {
+    const idx = mockAdmin.findIndex(a => a.affair_id === affairId);
+    if (idx !== -1) mockAdmin.splice(idx, 1);
+    return res.json({ success: true });
+  }
+
+  try {
+    if (runtimeAdminAffairs !== null) {
+      const idx = runtimeAdminAffairs.findIndex(a => a.affair_id === affairId);
+      if (idx !== -1) runtimeAdminAffairs.splice(idx, 1);
+      return res.json({ success: true });
+    }
+
+    const { error } = await supabase
+      .from('admin_affairs')
+      .delete()
+      .eq('affair_id', affairId);
+    if (error) throw error;
+    return res.json({ success: true });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // 6. Circuit Designs Endpoints
 app.get('/api/circuits', requireDepartment(['QA', 'Production']), async (req: Request, res: Response) => {
   if (isSupabaseMock) {

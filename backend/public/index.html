@@ -3233,6 +3233,7 @@
                     <th>Category</th>
                     <th>Announcement Detail</th>
                     <th>Date Published</th>
+                    <th style="text-align: right;">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -6204,9 +6205,30 @@
             <div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.15rem;">${a.description}</div>
           </td>
           <td style="font-size:0.78rem;">${new Date(a.created_at).toLocaleDateString()}</td>
+          <td style="text-align: right;">
+            <button class="btn btn-outline ceo-only-el" onclick="deleteAdminAffair(${a.affair_id})" style="padding: 0.2rem 0.5rem; font-size: 0.7rem; color: var(--failed); border-color: var(--border-color);" title="Delete Notice">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            </button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
+      enforceSidebarAccess(); // Re-apply visibility checks for the new .ceo-only-el buttons
+    }
+
+    async function deleteAdminAffair(affairId) {
+      if (!confirm('Are you sure you want to delete this notice?')) return;
+      try {
+        const res = await fetch(`/api/admin/${affairId}`, { method: 'DELETE' });
+        if (res.ok) {
+          showToast('Notice deleted.', 'success');
+          loadAdminData();
+        } else {
+          showToast('Failed to delete notice.', 'error');
+        }
+      } catch (err) {
+        showToast('Error deleting notice.', 'error');
+      }
     }
 
     document.getElementById('form-admin-post').addEventListener('submit', async (e) => {
