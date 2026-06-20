@@ -16,6 +16,10 @@
       "dest": "backend/src/index.ts"
     },
     {
+      "src": "/health",
+      "dest": "backend/src/index.ts"
+    },
+    {
       "src": "/(.*)",
       "dest": "backend/public/$1"
     }
