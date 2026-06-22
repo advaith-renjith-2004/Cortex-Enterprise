@@ -1,8 +1,9 @@
-const CACHE_NAME = 'cortex-erp-v21';
+const CACHE_NAME = 'cortex-erp-v22';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/favicon.ico',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   'https://cdn.jsdelivr.net/npm/chart.js',
