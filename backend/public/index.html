@@ -3854,6 +3854,9 @@
       if (activeItem) {
         activeItem.click();
       }
+      
+      // Load employees for profile metadata
+      loadAllEmployeesSilently();
     }
 
     function enforceSidebarAccess() {
@@ -4148,7 +4151,9 @@
     async function loadAllEmployeesSilently() {
       try {
         const response = await fetch('/api/employees');
-        allEmployees = await response.json();
+        if (response.ok) {
+          allEmployees = await response.json();
+        }
       } catch (err) {
         console.error('Silent employees load failed:', err);
       }
