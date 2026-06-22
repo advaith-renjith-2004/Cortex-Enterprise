@@ -47,6 +47,7 @@ let mockEmployees = [
   { employee_id: 2, first_name: 'Bob', last_name: 'Miller', email: 'bob.miller@cortex-enterprise.io', phone: '555-0143', department: 'Production', role: 'Mechanical Designer', street_address: '250 Fabrication Rd', city: 'Detroit', state: 'MI', zip_code: '48201', country: 'USA', is_active: true, hire_date: '2026-06-18' },
   { employee_id: 3, first_name: 'Charlie', last_name: 'Smith', email: 'charlie.smith@cortex-enterprise.io', phone: '555-0188', department: 'Accounting', role: 'Senior Auditor', street_address: '50 Wall St', city: 'New York', state: 'NY', zip_code: '10005', country: 'USA', is_active: true, hire_date: '2026-06-18' },
   { employee_id: 4, first_name: 'Paul', last_name: 'Sanna', email: 'paul.sanna@cortex-enterprise.io', phone: '555-0707', department: 'Administration', role: 'Admin User', street_address: '777 Enterprise Drive', city: 'San Francisco', state: 'CA', zip_code: '94105', country: 'USA', is_active: true, hire_date: '2026-06-18' },
+  { employee_id: 5, first_name: 'Advaith', last_name: 'Renjith', email: 'advaith.ceo@cortex-enterprise.io', phone: '555-0001', department: 'Administration', role: 'CEO', street_address: '1 Executive Blvd', city: 'San Jose', state: 'CA', zip_code: '95112', country: 'USA', is_active: true, hire_date: '2026-06-18' },
 ];
 
 let mockLedgers = [
